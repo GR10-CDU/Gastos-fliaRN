@@ -1,0 +1,2054 @@
+<!DOCTYPE html>
+<!--
+=====================================================
+GASTOS RODRIGUEZ NOTARI - Frontend
+Versión: 1.0.0
+Fecha: 2026-04-07 15:30 ARG
+=====================================================
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gastos Rodriguez Notari</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0a0b;
+      --bg-secondary: #111113;
+      --bg-tertiary: #1a1a1d;
+      --bg-card: #161618;
+      --border-color: #2a2a2e;
+      --border-accent: #3a3a40;
+      --text-primary: #f5f5f7;
+      --text-secondary: #a1a1a6;
+      --text-muted: #6e6e73;
+      --accent-green: #32D74B;
+      --accent-red: #FF453A;
+      --accent-yellow: #FFD60A;
+      --accent-blue: #0A84FF;
+      --accent-purple: #BF5AF2;
+      --accent-orange: #FF9F0A;
+      --accent-teal: #64D2FF;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-sans: 'Space Grotesk', sans-serif;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 20px rgba(0,0,0,0.4);
+      --shadow-glow: 0 0 30px rgba(50,215,75,0.15);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    
+    /* ==================== HEADER ==================== */
+    .header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--accent-green), var(--accent-teal));
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    
+    .logo-text {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    
+    .logo-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .header-stats {
+      display: flex;
+      gap: 24px;
+    }
+    
+    .header-stat {
+      text-align: right;
+    }
+    
+    .header-stat-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .header-stat-value {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent-green);
+    }
+    
+    /* ==================== NAV TABS ==================== */
+    .nav-tabs {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 20px;
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+    }
+    
+    .nav-tab {
+      padding: 14px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .nav-tab:hover {
+      color: var(--text-primary);
+      background: var(--bg-tertiary);
+    }
+    
+    .nav-tab.active {
+      color: var(--accent-green);
+      border-bottom-color: var(--accent-green);
+    }
+    
+    .nav-tab-icon {
+      font-size: 16px;
+    }
+    
+    .nav-badge {
+      background: var(--accent-red);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    
+    /* ==================== MAIN CONTENT ==================== */
+    .main-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
+    
+    .page {
+      display: none;
+    }
+    
+    .page.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* ==================== CARDS ==================== */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .card-title-icon {
+      font-size: 16px;
+    }
+    
+    /* ==================== FORMS ==================== */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+    
+    .form-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 500;
+    }
+    
+    .form-input, .form-select, .form-textarea {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 14px;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      transition: all 0.2s;
+    }
+    
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--accent-green);
+      box-shadow: 0 0 0 3px rgba(50,215,75,0.1);
+    }
+    
+    .form-input::placeholder {
+      color: var(--text-muted);
+    }
+    
+    .form-input-money {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .form-textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    
+    /* ==================== BUTTONS ==================== */
+    .btn {
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-sans);
+    }
+    
+    .btn-primary {
+      background: var(--accent-green);
+      color: #000;
+    }
+    
+    .btn-primary:hover {
+      background: #28c840;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-glow);
+    }
+    
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--border-color);
+    }
+    
+    .btn-danger {
+      background: var(--accent-red);
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #ff5c52;
+    }
+    
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-icon:hover {
+      background: var(--border-color);
+      color: var(--text-primary);
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    
+    /* ==================== AUTOCOMPLETE ==================== */
+    .autocomplete-wrapper {
+      position: relative;
+    }
+    
+    .autocomplete-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border-accent);
+      border-radius: var(--radius-sm);
+      margin-top: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 50;
+      box-shadow: var(--shadow-md);
+      display: none;
+    }
+    
+    .autocomplete-list.show {
+      display: block;
+    }
+    
+    .autocomplete-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      transition: background 0.15s;
+    }
+    
+    .autocomplete-item:last-child {
+      border-bottom: none;
+    }
+    
+    .autocomplete-item:hover {
+      background: var(--bg-tertiary);
+    }
+    
+    .autocomplete-desc {
+      font-size: 13px;
+    }
+    
+    .autocomplete-meta {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--accent-green);
+    }
+    
+    /* ==================== GASTOS LIST ==================== */
+    .gastos-filters {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    
+    .filter-chip {
+      padding: 8px 14px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .filter-chip:hover, .filter-chip.active {
+      border-color: var(--accent-green);
+      background: rgba(50,215,75,0.1);
+    }
+    
+    .filter-chip.active {
+      color: var(--accent-green);
+    }
+    
+    .gastos-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .gasto-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      gap: 16px;
+      align-items: center;
+      transition: all 0.2s;
+    }
+    
+    .gasto-item:hover {
+      border-color: var(--border-accent);
+      transform: translateX(4px);
+    }
+    
+    .gasto-cat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    
+    .gasto-info {
+      min-width: 0;
+    }
+    
+    .gasto-desc {
+      font-weight: 500;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .gasto-meta {
+      display: flex;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    
+    .gasto-monto {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent-red);
+      white-space: nowrap;
+    }
+    
+    .gasto-actions {
+      display: flex;
+      gap: 6px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    
+    .gasto-item:hover .gasto-actions {
+      opacity: 1;
+    }
+    
+    /* ==================== ESTADÍSTICAS ==================== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent-green);
+      margin-bottom: 4px;
+    }
+    
+    .stat-value.negative {
+      color: var(--accent-red);
+    }
+    
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .chart-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .chart-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .category-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .category-bar-item {
+      display: grid;
+      grid-template-columns: 40px 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .category-bar-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    
+    .category-bar-info {
+      min-width: 0;
+    }
+    
+    .category-bar-name {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+    
+    .category-bar-track {
+      height: 8px;
+      background: var(--bg-tertiary);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .category-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    
+    .category-bar-amount {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 600;
+      text-align: right;
+      min-width: 100px;
+    }
+    
+    .category-bar-percent {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    
+    /* ==================== RECORDATORIOS ==================== */
+    .recordatorio-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .recordatorio-item.vencido {
+      border-color: var(--accent-red);
+      background: rgba(255,69,58,0.05);
+    }
+    
+    .recordatorio-item.proximo {
+      border-color: var(--accent-yellow);
+      background: rgba(255,214,10,0.05);
+    }
+    
+    .recordatorio-status {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent-green);
+    }
+    
+    .recordatorio-item.vencido .recordatorio-status {
+      background: var(--accent-red);
+      animation: pulse 1.5s infinite;
+    }
+    
+    .recordatorio-item.proximo .recordatorio-status {
+      background: var(--accent-yellow);
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .recordatorio-info h4 {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    
+    .recordatorio-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      gap: 12px;
+    }
+    
+    .recordatorio-monto {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    .recordatorio-actions {
+      display: flex;
+      gap: 6px;
+    }
+    
+    .btn-pagar {
+      background: var(--accent-green);
+      color: #000;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    
+    .btn-pagar:hover {
+      background: #28c840;
+    }
+    
+    /* ==================== RECURRENTES SUGERIDOS ==================== */
+    .sugerencia-item {
+      background: var(--bg-tertiary);
+      border: 1px dashed var(--border-accent);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .sugerencia-info h4 {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    
+    .sugerencia-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    
+    .btn-agregar-rec {
+      background: transparent;
+      border: 1px solid var(--accent-green);
+      color: var(--accent-green);
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-agregar-rec:hover {
+      background: var(--accent-green);
+      color: #000;
+    }
+    
+    /* ==================== MODALES ==================== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 20px;
+    }
+    
+    .modal-overlay.show {
+      display: flex;
+    }
+    
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: modalIn 0.3s ease;
+    }
+    
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+    
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-tertiary);
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-close:hover {
+      background: var(--border-color);
+    }
+    
+    .modal-body {
+      padding: 20px;
+    }
+    
+    .modal-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    
+    /* ==================== LOADING ==================== */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(10,10,11,0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+    }
+    
+    .loading-overlay.show {
+      display: flex;
+    }
+    
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid var(--border-color);
+      border-top-color: var(--accent-green);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* ==================== TOAST ==================== */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 400;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .toast {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow-md);
+      animation: toastIn 0.3s ease;
+      max-width: 350px;
+    }
+    
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateX(100%);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    .toast.success {
+      border-left: 3px solid var(--accent-green);
+    }
+    
+    .toast.error {
+      border-left: 3px solid var(--accent-red);
+    }
+    
+    .toast-icon {
+      font-size: 20px;
+    }
+    
+    .toast-message {
+      font-size: 13px;
+    }
+    
+    /* ==================== EMPTY STATE ==================== */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+    
+    .empty-state-text {
+      font-size: 14px;
+    }
+    
+    /* ==================== PERIODO SELECTOR ==================== */
+    .periodo-selector {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .periodo-btn {
+      padding: 8px 16px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .periodo-btn:hover, .periodo-btn.active {
+      background: var(--accent-green);
+      color: #000;
+      border-color: var(--accent-green);
+    }
+    
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 768px) {
+      .header-stats {
+        display: none;
+      }
+      
+      .gasto-item {
+        grid-template-columns: auto 1fr auto;
+      }
+      
+      .gasto-actions {
+        opacity: 1;
+        grid-column: 1 / -1;
+        justify-content: flex-end;
+        margin-top: 8px;
+      }
+      
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .category-bar-item {
+        grid-template-columns: 36px 1fr;
+      }
+      
+      .category-bar-amount {
+        grid-column: 1 / -1;
+        text-align: left;
+        margin-top: 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-content">
+      <div class="logo">
+        <div class="logo-icon">💰</div>
+        <div>
+          <div class="logo-text">GASTOS</div>
+          <div class="logo-subtitle">Rodriguez Notari</div>
+        </div>
+      </div>
+      <div class="header-stats">
+        <div class="header-stat">
+          <div class="header-stat-label">Este mes</div>
+          <div class="header-stat-value" id="headerTotalMes">$0</div>
+        </div>
+        <div class="header-stat">
+          <div class="header-stat-label">Hoy</div>
+          <div class="header-stat-value" id="headerTotalHoy">$0</div>
+        </div>
+      </div>
+    </div>
+  </header>
+  
+  <!-- NAV TABS -->
+  <nav class="nav-tabs">
+    <div class="nav-tab active" data-page="gastos">
+      <span class="nav-tab-icon">📝</span>
+      Gastos
+    </div>
+    <div class="nav-tab" data-page="estadisticas">
+      <span class="nav-tab-icon">📊</span>
+      Estadísticas
+    </div>
+    <div class="nav-tab" data-page="recordatorios">
+      <span class="nav-tab-icon">🔔</span>
+      Recordatorios
+      <span class="nav-badge" id="badgeRecordatorios" style="display:none;">0</span>
+    </div>
+    <div class="nav-tab" data-page="categorias">
+      <span class="nav-tab-icon">🏷️</span>
+      Categorías
+    </div>
+  </nav>
+  
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    
+    <!-- PAGE: GASTOS -->
+    <section class="page active" id="page-gastos">
+      <!-- Formulario nuevo gasto -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="card-title-icon">➕</span>
+            Nuevo Gasto
+          </div>
+        </div>
+        <form id="formNuevoGasto">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Fecha</label>
+              <input type="date" class="form-input" id="gastoFecha" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Categoría</label>
+              <select class="form-select" id="gastoCategoria" required>
+                <option value="">Seleccionar...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Monto</label>
+              <input type="number" class="form-input form-input-money" id="gastoMonto" placeholder="0.00" step="0.01" min="0" required>
+            </div>
+            <div class="form-group autocomplete-wrapper">
+              <label class="form-label">Descripción</label>
+              <input type="text" class="form-input" id="gastoDescripcion" placeholder="¿En qué gastaste?" required autocomplete="off">
+              <div class="autocomplete-list" id="autocompleteList"></div>
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label">Observaciones (opcional)</label>
+              <textarea class="form-textarea" id="gastoObservaciones" placeholder="Detalles adicionales..."></textarea>
+            </div>
+          </div>
+          <div class="btn-group">
+            <button type="submit" class="btn btn-primary">
+              <span>💾</span> Guardar Gasto
+            </button>
+            <button type="reset" class="btn btn-secondary">Limpiar</button>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Filtros -->
+      <div class="gastos-filters">
+        <input type="text" class="form-input" id="filtroTexto" placeholder="🔍 Buscar..." style="width: 200px;">
+        <select class="form-select" id="filtroCategoria" style="width: 160px;">
+          <option value="">Todas las categorías</option>
+        </select>
+        <input type="date" class="form-input" id="filtroDesde" style="width: 150px;">
+        <input type="date" class="form-input" id="filtroHasta" style="width: 150px;">
+        <button class="btn btn-secondary" id="btnLimpiarFiltros">✕ Limpiar</button>
+      </div>
+      
+      <!-- Lista de gastos -->
+      <div class="gastos-list" id="gastosLista">
+        <div class="empty-state">
+          <div class="empty-state-icon">📭</div>
+          <div class="empty-state-text">No hay gastos registrados</div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- PAGE: ESTADÍSTICAS -->
+    <section class="page" id="page-estadisticas">
+      <div class="periodo-selector">
+        <button class="periodo-btn" data-periodo="semana">Semana</button>
+        <button class="periodo-btn active" data-periodo="mes">Mes</button>
+        <button class="periodo-btn" data-periodo="trimestre">Trimestre</button>
+        <button class="periodo-btn" data-periodo="año">Año</button>
+      </div>
+      
+      <div class="stats-grid" id="statsResumen">
+        <div class="stat-card">
+          <div class="stat-value negative" id="statTotal">$0</div>
+          <div class="stat-label">Total Gastado</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statCantidad">0</div>
+          <div class="stat-label">Transacciones</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statPromedio">$0</div>
+          <div class="stat-label">Promedio</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statDiario">$0</div>
+          <div class="stat-label">Promedio Diario</div>
+        </div>
+      </div>
+      
+      <div class="chart-container">
+        <div class="chart-title">📊 Gastos por Categoría</div>
+        <div class="category-bars" id="categoryBars"></div>
+      </div>
+      
+      <div class="chart-container">
+        <div class="chart-title">📈 Evolución Diaria</div>
+        <canvas id="chartEvolucion" height="200"></canvas>
+      </div>
+    </section>
+    
+    <!-- PAGE: RECORDATORIOS -->
+    <section class="page" id="page-recordatorios">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="card-title-icon">➕</span>
+            Nuevo Recordatorio
+          </div>
+        </div>
+        <form id="formNuevoRecordatorio">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Título</label>
+              <input type="text" class="form-input" id="recTitulo" placeholder="Ej: Luz, Internet, Alquiler" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Categoría</label>
+              <select class="form-select" id="recCategoria" required>
+                <option value="">Seleccionar...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Monto Estimado</label>
+              <input type="number" class="form-input form-input-money" id="recMonto" placeholder="0.00" step="0.01" min="0" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Frecuencia</label>
+              <select class="form-select" id="recFrecuencia" required>
+                <option value="mensual">Mensual</option>
+                <option value="semanal">Semanal</option>
+                <option value="anual">Anual</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Próxima Fecha</label>
+              <input type="date" class="form-input" id="recProximaFecha" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Descripción (opcional)</label>
+              <input type="text" class="form-input" id="recDescripcion" placeholder="Detalles...">
+            </div>
+          </div>
+          <div class="btn-group">
+            <button type="submit" class="btn btn-primary">
+              <span>🔔</span> Crear Recordatorio
+            </button>
+          </div>
+        </form>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="card-title-icon">📋</span>
+            Mis Recordatorios
+          </div>
+        </div>
+        <div id="recordatoriosLista"></div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="card-title-icon">🤖</span>
+            Gastos Recurrentes Detectados
+          </div>
+        </div>
+        <div id="recurrentesSugeridos"></div>
+      </div>
+    </section>
+    
+    <!-- PAGE: CATEGORÍAS -->
+    <section class="page" id="page-categorias">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="card-title-icon">➕</span>
+            Nueva Categoría
+          </div>
+        </div>
+        <form id="formNuevaCategoria">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Nombre</label>
+              <input type="text" class="form-input" id="catNombre" placeholder="Ej: Mascotas" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Icono (emoji)</label>
+              <input type="text" class="form-input" id="catIcono" placeholder="🐶" maxlength="2">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Color</label>
+              <input type="color" class="form-input" id="catColor" value="#6B7280" style="height: 44px;">
+            </div>
+          </div>
+          <div class="btn-group">
+            <button type="submit" class="btn btn-primary">
+              <span>🏷️</span> Crear Categoría
+            </button>
+          </div>
+        </form>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="card-title-icon">📋</span>
+            Categorías Existentes
+          </div>
+        </div>
+        <div id="categoriasLista"></div>
+      </div>
+    </section>
+    
+  </main>
+  
+  <!-- MODAL EDITAR GASTO -->
+  <div class="modal-overlay" id="modalEditarGasto">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">✏️ Editar Gasto</div>
+        <button class="modal-close" onclick="cerrarModal('modalEditarGasto')">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="formEditarGasto">
+          <input type="hidden" id="editGastoId">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Fecha</label>
+              <input type="date" class="form-input" id="editGastoFecha" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Categoría</label>
+              <select class="form-select" id="editGastoCategoria" required></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Monto</label>
+              <input type="number" class="form-input form-input-money" id="editGastoMonto" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Descripción</label>
+              <input type="text" class="form-input" id="editGastoDescripcion" required>
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label">Observaciones</label>
+              <textarea class="form-textarea" id="editGastoObservaciones"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="cerrarModal('modalEditarGasto')">Cancelar</button>
+        <button class="btn btn-primary" onclick="guardarEdicionGasto()">Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- LOADING -->
+  <div class="loading-overlay" id="loading">
+    <div class="loading-spinner"></div>
+  </div>
+  
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+  
+  <script>
+    // =====================================================
+    // CONFIGURACIÓN
+    // =====================================================
+    var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzI-EyAxBVRELmii4c_O6LFStE-URh4XIPe-j7Q6fvoCristklqEJ0lh5LOzZIPfjc/exec';
+    var API_SECRET = 'GASTOS-RN2026-xK9mQ7vL2nR4wT8y';
+    
+    // Estado global
+    var categorias = [];
+    var gastos = [];
+    var recordatorios = [];
+    var periodoActual = 'mes';
+    
+    // =====================================================
+    // UTILIDADES
+    // =====================================================
+    function showLoading() {
+      document.getElementById('loading').classList.add('show');
+    }
+    
+    function hideLoading() {
+      document.getElementById('loading').classList.remove('show');
+    }
+    
+    function showToast(message, type) {
+      type = type || 'success';
+      var container = document.getElementById('toastContainer');
+      var toast = document.createElement('div');
+      toast.className = 'toast ' + type;
+      toast.innerHTML = '<span class="toast-icon">' + (type === 'success' ? '✅' : '❌') + '</span><span class="toast-message">' + message + '</span>';
+      container.appendChild(toast);
+      
+      setTimeout(function() {
+        toast.style.animation = 'toastIn 0.3s ease reverse';
+        setTimeout(function() { toast.remove(); }, 300);
+      }, 3000);
+    }
+    
+    function formatMoney(amount) {
+      return '$' + Number(amount).toLocaleString('es-AR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+    
+    function formatDate(dateStr) {
+      var date = new Date(dateStr + 'T00:00:00');
+      return date.toLocaleDateString('es-AR', { 
+        day: '2-digit', 
+        month: 'short'
+      });
+    }
+    
+    function apiCall(action, data) {
+      data = data || {};
+      return fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(Object.assign({ action: action, secret: API_SECRET }, data))
+      })
+      .then(function(response) { return response.json(); })
+      .catch(function(error) {
+        console.error('API Error:', error);
+        return { success: false, error: error.message };
+      });
+    }
+    
+    function cerrarModal(modalId) {
+      document.getElementById(modalId).classList.remove('show');
+    }
+    
+    function abrirModal(modalId) {
+      document.getElementById(modalId).classList.add('show');
+    }
+    
+    // =====================================================
+    // NAVEGACIÓN
+    // =====================================================
+    document.querySelectorAll('.nav-tab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        var page = tab.dataset.page;
+        
+        document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        
+        document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+        document.getElementById('page-' + page).classList.add('active');
+        
+        // Cargar datos según la página
+        if (page === 'estadisticas') {
+          cargarEstadisticas();
+        } else if (page === 'recordatorios') {
+          cargarRecordatorios();
+          cargarGastosRecurrentes();
+        } else if (page === 'categorias') {
+          renderCategorias();
+        }
+      });
+    });
+    
+    // =====================================================
+    // CATEGORÍAS
+    // =====================================================
+    function cargarCategorias() {
+      return apiCall('getCategorias').then(function(result) {
+        if (result.success) {
+          categorias = result.categorias;
+          poblarSelectsCategorias();
+          renderCategorias();
+        }
+      });
+    }
+    
+    function poblarSelectsCategorias() {
+      var selects = ['gastoCategoria', 'filtroCategoria', 'editGastoCategoria', 'recCategoria'];
+      
+      selects.forEach(function(id) {
+        var select = document.getElementById(id);
+        if (!select) return;
+        
+        var currentValue = select.value;
+        select.innerHTML = id === 'filtroCategoria' 
+          ? '<option value="">Todas las categorías</option>'
+          : '<option value="">Seleccionar...</option>';
+        
+        categorias.forEach(function(cat) {
+          var option = document.createElement('option');
+          option.value = cat.id;
+          option.textContent = cat.icono + ' ' + cat.nombre;
+          select.appendChild(option);
+        });
+        
+        if (currentValue) select.value = currentValue;
+      });
+    }
+    
+    function renderCategorias() {
+      var container = document.getElementById('categoriasLista');
+      if (!categorias.length) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-text">No hay categorías</div></div>';
+        return;
+      }
+      
+      container.innerHTML = categorias.map(function(cat) {
+        return '<div class="gasto-item" style="margin-bottom: 8px;">' +
+          '<div class="gasto-cat-icon" style="background: ' + cat.color + '20; color: ' + cat.color + ';">' + cat.icono + '</div>' +
+          '<div class="gasto-info">' +
+            '<div class="gasto-desc">' + cat.nombre + '</div>' +
+            '<div class="gasto-meta">' +
+              '<span>ID: ' + cat.id + '</span>' +
+              '<span style="color: ' + cat.color + ';">● ' + cat.color + '</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+    
+    document.getElementById('formNuevaCategoria').addEventListener('submit', function(e) {
+      e.preventDefault();
+      showLoading();
+      
+      var categoria = {
+        nombre: document.getElementById('catNombre').value,
+        icono: document.getElementById('catIcono').value || '📦',
+        color: document.getElementById('catColor').value
+      };
+      
+      apiCall('addCategoria', { categoria: categoria }).then(function(result) {
+        hideLoading();
+        if (result.success) {
+          showToast('Categoría creada');
+          e.target.reset();
+          cargarCategorias();
+        } else {
+          showToast(result.error || 'Error al crear categoría', 'error');
+        }
+      });
+    });
+    
+    // =====================================================
+    // GASTOS
+    // =====================================================
+    function cargarGastos() {
+      var filtros = {
+        categoriaId: document.getElementById('filtroCategoria').value,
+        fechaDesde: document.getElementById('filtroDesde').value,
+        fechaHasta: document.getElementById('filtroHasta').value,
+        busqueda: document.getElementById('filtroTexto').value
+      };
+      
+      showLoading();
+      return apiCall('getGastos', { filtros: filtros }).then(function(result) {
+        hideLoading();
+        if (result.success) {
+          gastos = result.gastos;
+          renderGastos();
+          actualizarHeaderStats();
+        }
+      });
+    }
+    
+    function renderGastos() {
+      var container = document.getElementById('gastosLista');
+      
+      if (!gastos.length) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">No hay gastos registrados</div></div>';
+        return;
+      }
+      
+      container.innerHTML = gastos.map(function(gasto) {
+        var cat = categorias.find(function(c) { return c.id === gasto.categoriaId; }) || { icono: '📦', color: '#6B7280', nombre: 'Sin categoría' };
+        
+        return '<div class="gasto-item" data-id="' + gasto.id + '">' +
+          '<div class="gasto-cat-icon" style="background: ' + cat.color + '20; color: ' + cat.color + ';">' + cat.icono + '</div>' +
+          '<div class="gasto-info">' +
+            '<div class="gasto-desc">' + gasto.descripcion + '</div>' +
+            '<div class="gasto-meta">' +
+              '<span>📅 ' + formatDate(gasto.fecha) + '</span>' +
+              '<span>🏷️ ' + cat.nombre + '</span>' +
+              (gasto.observaciones ? '<span>💬 ' + gasto.observaciones.substring(0, 20) + '...</span>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="gasto-monto">-' + formatMoney(gasto.monto) + '</div>' +
+          '<div class="gasto-actions">' +
+            '<button class="btn-icon" onclick="editarGasto(\'' + gasto.id + '\')" title="Editar">✏️</button>' +
+            '<button class="btn-icon" onclick="eliminarGasto(\'' + gasto.id + '\')" title="Eliminar">🗑️</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+    
+    function actualizarHeaderStats() {
+      var hoy = new Date().toISOString().split('T')[0];
+      var primerDiaMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+      
+      var totalHoy = 0;
+      var totalMes = 0;
+      
+      gastos.forEach(function(g) {
+        var fechaGasto = g.fecha;
+        if (fechaGasto === hoy) totalHoy += Number(g.monto);
+        if (fechaGasto >= primerDiaMes) totalMes += Number(g.monto);
+      });
+      
+      document.getElementById('headerTotalHoy').textContent = formatMoney(totalHoy);
+      document.getElementById('headerTotalMes').textContent = formatMoney(totalMes);
+    }
+    
+    // Formulario nuevo gasto
+    document.getElementById('formNuevoGasto').addEventListener('submit', function(e) {
+      e.preventDefault();
+      showLoading();
+      
+      var gasto = {
+        fecha: document.getElementById('gastoFecha').value,
+        categoriaId: document.getElementById('gastoCategoria').value,
+        monto: parseFloat(document.getElementById('gastoMonto').value),
+        descripcion: document.getElementById('gastoDescripcion').value,
+        observaciones: document.getElementById('gastoObservaciones').value
+      };
+      
+      apiCall('addGasto', { gasto: gasto }).then(function(result) {
+        hideLoading();
+        if (result.success) {
+          showToast('Gasto registrado correctamente');
+          e.target.reset();
+          document.getElementById('gastoFecha').value = new Date().toISOString().split('T')[0];
+          cargarGastos();
+        } else {
+          showToast(result.error || 'Error al registrar gasto', 'error');
+        }
+      });
+    });
+    
+    // Editar gasto
+    function editarGasto(id) {
+      var gasto = gastos.find(function(g) { return g.id === id; });
+      if (!gasto) return;
+      
+      document.getElementById('editGastoId').value = gasto.id;
+      document.getElementById('editGastoFecha').value = gasto.fecha;
+      document.getElementById('editGastoCategoria').value = gasto.categoriaId;
+      document.getElementById('editGastoMonto').value = gasto.monto;
+      document.getElementById('editGastoDescripcion').value = gasto.descripcion;
+      document.getElementById('editGastoObservaciones').value = gasto.observaciones || '';
+      
+      abrirModal('modalEditarGasto');
+    }
+    
+    function guardarEdicionGasto() {
+      showLoading();
+      
+      var id = document.getElementById('editGastoId').value;
+      var gasto = {
+        fecha: document.getElementById('editGastoFecha').value,
+        categoriaId: document.getElementById('editGastoCategoria').value,
+        monto: parseFloat(document.getElementById('editGastoMonto').value),
+        descripcion: document.getElementById('editGastoDescripcion').value,
+        observaciones: document.getElementById('editGastoObservaciones').value
+      };
+      
+      apiCall('updateGasto', { id: id, gasto: gasto }).then(function(result) {
+        hideLoading();
+        if (result.success) {
+          showToast('Gasto actualizado');
+          cerrarModal('modalEditarGasto');
+          cargarGastos();
+        } else {
+          showToast(result.error || 'Error al actualizar', 'error');
+        }
+      });
+    }
+    
+    function eliminarGasto(id) {
+      if (!confirm('¿Eliminar este gasto?')) return;
+      
+      showLoading();
+      apiCall('deleteGasto', { id: id }).then(function(result) {
+        hideLoading();
+        if (result.success) {
+          showToast('Gasto eliminado');
+          cargarGastos();
+        } else {
+          showToast(result.error || 'Error al eliminar', 'error');
+        }
+      });
+    }
+    
+    // Filtros
+    ['filtroTexto', 'filtroCategoria', 'filtroDesde', 'filtroHasta'].forEach(function(id) {
+      document.getElementById(id).addEventListener('change', cargarGastos);
+    });
+    
+    document.getElementById('filtroTexto').addEventListener('input', debounce(cargarGastos, 300));
+    
+    document.getElementById('btnLimpiarFiltros').addEventListener('click', function() {
+      document.getElementById('filtroTexto').value = '';
+      document.getElementById('filtroCategoria').value = '';
+      document.getElementById('filtroDesde').value = '';
+      document.getElementById('filtroHasta').value = '';
+      cargarGastos();
+    });
+    
+    function debounce(func, wait) {
+      var timeout;
+      return function() {
+        var args = arguments;
+        var context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(function() { func.apply(context, args); }, wait);
+      };
+    }
+    
+    // =====================================================
+    // AUTOCOMPLETADO
+    // =====================================================
+    var inputDescripcion = document.getElementById('gastoDescripcion');
+    var autocompleteList = document.getElementById('autocompleteList');
+    
+    inputDescripcion.addEventListener('input', debounce(function(e) {
+      var texto = e.target.value;
+      if (texto.length < 2) {
+        autocompleteList.classList.remove('show');
+        return;
+      }
+      
+      var categoriaId = document.getElementById('gastoCategoria').value;
+      apiCall('getAutocompleteSugerencias', { texto: texto, categoriaId: categoriaId }).then(function(result) {
+        if (result.success && result.sugerencias.length > 0) {
+          autocompleteList.innerHTML = result.sugerencias.map(function(sug) {
+            return '<div class="autocomplete-item" data-desc="' + sug.descripcion + '" data-monto="' + sug.ultimoMonto + '" data-cat="' + sug.categoriaId + '">' +
+              '<span class="autocomplete-desc">' + sug.descripcion + '</span>' +
+              '<span class="autocomplete-meta">' + formatMoney(sug.ultimoMonto) + ' (' + sug.count + 'x)</span>' +
+            '</div>';
+          }).join('');
+          autocompleteList.classList.add('show');
+        } else {
+          autocompleteList.classList.remove('show');
+        }
+      });
+    }, 200));
+    
+    autocompleteList.addEventListener('click', function(e) {
+      var item = e.target.closest('.autocomplete-item');
+      if (item) {
+        document.getElementById('gastoDescripcion').value = item.dataset.desc;
+        document.getElementById('gastoMonto').value = item.dataset.monto;
+        if (item.dataset.cat) {
+          document.getElementById('gastoCategoria').value = item.dataset.cat;
+        }
+        autocompleteList.classList.remove('show');
+      }
+    });
+    
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.autocomplete-wrapper')) {
+        autocompleteList.classList.remove('show');
+      }
+    });
+    
+    // =====================================================
+    // ESTADÍSTICAS
+    // =====================================================
+    document.querySelectorAll('.periodo-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.periodo-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        periodoActual = btn.dataset.periodo;
+        cargarEstadisticas();
+      });
+    });
+    
+    function cargarEstadisticas() {
+      showLoading();
+      apiCall('getEstadisticas', { periodo: periodoActual }).then(function(result) {
+        hideLoading();
+        if (result.success) {
+          // Resumen
+          document.getElementById('statTotal').textContent = formatMoney(result.resumen.totalGeneral);
+          document.getElementById('statCantidad').textContent = result.resumen.cantidadGastos;
+          document.getElementById('statPromedio').textContent = formatMoney(result.resumen.promedioGasto);
+          
+          // Calcular promedio diario
+          var dias;
+          switch(periodoActual) {
+            case 'semana': dias = 7; break;
+            case 'mes': dias = 30; break;
+            case 'trimestre': dias = 90; break;
+            case 'año': dias = 365; break;
+            default: dias = 30;
+          }
+          var promedioDiario = result.resumen.totalGeneral / dias;
+          document.getElementById('statDiario').textContent = formatMoney(promedioDiario);
+          
+          // Barras por categoría
+          renderCategoryBars(result.estadisticas, result.resumen.totalGeneral);
+          
+          // Gráfico de evolución
+          renderEvolucionChart(result.evolucion);
+        }
+      });
+    }
+    
+    function renderCategoryBars(estadisticas, total) {
+      var container = document.getElementById('categoryBars');
+      
+      if (!estadisticas.length) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-text">Sin datos para este período</div></div>';
+        return;
+      }
+      
+      var maxValue = Math.max.apply(null, estadisticas.map(function(e) { return e.total; }));
+      
+      container.innerHTML = estadisticas.map(function(stat) {
+        return '<div class="category-bar-item">' +
+          '<div class="category-bar-icon" style="background: ' + stat.color + '20; color: ' + stat.color + ';">' + stat.icono + '</div>' +
+          '<div class="category-bar-info">' +
+            '<div class="category-bar-name">' + stat.nombre + '</div>' +
+            '<div class="category-bar-track">' +
+              '<div class="category-bar-fill" style="width: ' + (stat.total / maxValue * 100) + '%; background: ' + stat.color + ';"></div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="category-bar-amount">' +
+            formatMoney(stat.total) +
+            '<div class="category-bar-percent">' + stat.porcentaje + '%</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+    
+    function renderEvolucionChart(evolucion) {
+      var canvas = document.getElementById('chartEvolucion');
+      var ctx = canvas.getContext('2d');
+      
+      if (!evolucion || evolucion.length === 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#6e6e73';
+        ctx.font = '14px Space Grotesk';
+        ctx.textAlign = 'center';
+        ctx.fillText('Sin datos para este período', canvas.width / 2, canvas.height / 2);
+        return;
+      }
+      
+      // Crear chart simple con Canvas API
+      var padding = 40;
+      var width = canvas.width;
+      var height = canvas.height;
+      var chartWidth = width - padding * 2;
+      var chartHeight = height - padding * 2;
+      
+      var maxValue = Math.max.apply(null, evolucion.map(function(e) { return e.monto; }));
+      var minValue = 0;
+      
+      ctx.clearRect(0, 0, width, height);
+      
+      // Línea
+      ctx.beginPath();
+      ctx.strokeStyle = '#32D74B';
+      ctx.lineWidth = 2;
+      
+      evolucion.forEach(function(punto, i) {
+        var x = padding + (i / (evolucion.length - 1)) * chartWidth;
+        var y = height - padding - ((punto.monto - minValue) / (maxValue - minValue)) * chartHeight;
+        
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+      
+      ctx.stroke();
+      
+      // Área bajo la curva
+      ctx.lineTo(padding + chartWidth, height - padding);
+      ctx.lineTo(padding, height - padding);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(50, 215, 75, 0.1)';
+      ctx.fill();
+      
+      // Puntos
+      evolucion.forEach(function(punto, i) {
+        var x = padding + (i / (evolucion.length - 1)) * chartWidth;
+        var y = height - padding - ((punto.monto - minValue) / (maxValue - minValue)) * chartHeight;
+        
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#32D74B';
+        ctx.fill();
+      });
+    }
+    
+    // =====================================================
+    // RECORDATORIOS
+    // =====================================================
+    function cargarRecordatorios() {
+      showLoading();
+      return apiCall('getRecordatorios').then(function(result) {
+        hideLoading();
+        if (result.success) {
+          recordatorios = result.recordatorios;
+          renderRecordatorios();
+          actualizarBadgeRecordatorios();
+        }
+      });
+    }
+    
+    function renderRecordatorios() {
+      var container = document.getElementById('recordatoriosLista');
+      
+      if (!recordatorios.length) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-text">No hay recordatorios</div></div>';
+        return;
+      }
+      
+      var hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+      
+      container.innerHTML = recordatorios.filter(function(r) { return r.activo; }).map(function(rec) {
+        var cat = categorias.find(function(c) { return c.id === rec.categoriaId; }) || { icono: '📦', nombre: 'Sin categoría' };
+        var proximaFecha = new Date(rec.proximaFecha + 'T00:00:00');
+        var diasRestantes = Math.ceil((proximaFecha - hoy) / (1000 * 60 * 60 * 24));
+        
+        var estado = '';
+        if (diasRestantes < 0) estado = 'vencido';
+        else if (diasRestantes <= 3) estado = 'proximo';
+        
+        return '<div class="recordatorio-item ' + estado + '">' +
+          '<div class="recordatorio-status"></div>' +
+          '<div class="recordatorio-info">' +
+            '<h4>' + cat.icono + ' ' + rec.titulo + '</h4>' +
+            '<div class="recordatorio-meta">' +
+              '<span>📅 ' + formatDate(rec.proximaFecha) + '</span>' +
+              '<span>🔄 ' + rec.frecuencia + '</span>' +
+              (diasRestantes < 0 ? '<span style="color: var(--accent-red);">⚠️ Vencido</span>' : 
+                diasRestantes === 0 ? '<span style="color: var(--accent-yellow);">⏰ HOY</span>' :
+                diasRestantes <= 3 ? '<span style="color: var(--accent-yellow);">En ' + diasRestantes + ' días</span>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="recordatorio-monto">' + formatMoney(rec.monto) + '</div>' +
+          '<div class="recordatorio-actions">' +
+            '<button class="btn-pagar" onclick="pagarRecordatorio(\'' + rec.id + '\', \'' + rec.titulo + '\', ' + rec.monto + ', \'' + rec.categoriaId + '\')">💸 Pagar</button>' +
+            '<button class="btn-icon" onclick="eliminarRecordatorio(\'' + rec.id + '\')" title="Eliminar">🗑️</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+    
+    function actualizarBadgeRecordatorios() {
+      var hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+      
+      var vencidos = recordatorios.filter(function(r) {
+        if (!r.activo) return false;
+        var fecha = new Date(r.proximaFecha + 'T00:00:00');
+        return fecha <= hoy;
+      }).length;
+      
+      var badge = document.getElementById('badgeRecordatorios');
+      if (vencidos > 0) {
+        badge.textContent = vencidos;
+        badge.style.display = 'inline';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+    
+    document.getElementById('formNuevoRecordatorio').addEventListener('submit', function(e) {
+      e.preventDefault();
+      showLoading();
+      
+      var recordatorio = {
+        titulo: document.getElementById('recTitulo').value,
+        descripcion: document.getElementById('recDescripcion').value,
+        monto: parseFloat(document.getElementById('recMonto').value),
+        categoriaId: document.getElementById('recCategoria').value,
+        frecuencia: document.getElementById('recFrecuencia').value,
+        proximaFecha: document.getElementById('recProximaFecha').value
+      };
+      
+      apiCall('addRecordatorio', { recordatorio: recordatorio }).then(function(result) {
+        hideLoading();
+        if (result.success) {
+          showToast('Recordatorio creado');
+          e.target.reset();
+          cargarRecordatorios();
+        } else {
+          showToast(result.error || 'Error al crear recordatorio', 'error');
+        }
+      });
+    });
+    
+    function pagarRecordatorio(id, titulo, monto, categoriaId) {
+      if (!confirm('¿Registrar pago de "' + titulo + '" por ' + formatMoney(monto) + '?')) return;
+      
+      showLoading();
+      
+      // Crear gasto
+      var gasto = {
+        fecha: new Date().toISOString().split('T')[0],
+        categoriaId: categoriaId,
+        monto: monto,
+        descripcion: titulo,
+        observaciones: 'Pago de recordatorio'
+      };
+      
+      apiCall('addGasto', { gasto: gasto }).then(function() {
+        // Actualizar próxima fecha del recordatorio
+        return apiCall('marcarRecordatorioCompletado', { id: id });
+      }).then(function() {
+        hideLoading();
+        showToast('Pago registrado y recordatorio actualizado');
+        cargarRecordatorios();
+        cargarGastos();
+      });
+    }
+    
+    function eliminarRecordatorio(id) {
+      if (!confirm('¿Eliminar este recordatorio?')) return;
+      
+      showLoading();
+      apiCall('deleteRecordatorio', { id: id }).then(function(result) {
+        hideLoading();
+        if (result.success) {
+          showToast('Recordatorio eliminado');
+          cargarRecordatorios();
+        } else {
+          showToast(result.error || 'Error al eliminar', 'error');
+        }
+      });
+    }
+    
+    // =====================================================
+    // GASTOS RECURRENTES DETECTADOS
+    // =====================================================
+    function cargarGastosRecurrentes() {
+      apiCall('getGastosRecurrentes').then(function(result) {
+        if (result.success) {
+          renderGastosRecurrentes(result.recurrentes);
+        }
+      });
+    }
+    
+    function renderGastosRecurrentes(recurrentes) {
+      var container = document.getElementById('recurrentesSugeridos');
+      
+      if (!recurrentes.length) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-text">Aún no detectamos gastos recurrentes. Sigue registrando tus gastos.</div></div>';
+        return;
+      }
+      
+      container.innerHTML = recurrentes.map(function(rec) {
+        var cat = categorias.find(function(c) { return c.id === rec.categoriaId; }) || { icono: '📦', nombre: 'Sin categoría' };
+        
+        return '<div class="sugerencia-item">' +
+          '<div class="sugerencia-info">' +
+            '<h4>' + cat.icono + ' ' + rec.descripcion + '</h4>' +
+            '<div class="sugerencia-meta">🔄 ' + rec.frecuencia + ' • ' + rec.ocurrencias + ' veces • Próximo: ' + formatDate(rec.proximaFechaEstimada) + ' • ~' + formatMoney(rec.montoPromedio) + '</div>' +
+          '</div>' +
+          '<button class="btn-agregar-rec" onclick="crearRecordatorioDesdeRecurrente(\'' + rec.descripcion.replace(/'/g, "\\'") + '\', ' + rec.montoPromedio + ', \'' + rec.categoriaId + '\', \'' + rec.frecuencia + '\', \'' + rec.proximaFechaEstimada + '\')">➕ Crear Recordatorio</button>' +
+        '</div>';
+      }).join('');
+    }
+    
+    function crearRecordatorioDesdeRecurrente(descripcion, monto, categoriaId, frecuencia, proximaFecha) {
+      showLoading();
+      
+      var recordatorio = {
+        titulo: descripcion,
+        descripcion: 'Creado automáticamente desde gastos recurrentes',
+        monto: monto,
+        categoriaId: categoriaId,
+        frecuencia: frecuencia,
+        proximaFecha: proximaFecha
+      };
+      
+      apiCall('addRecordatorio', { recordatorio: recordatorio }).then(function(result) {
+        hideLoading();
+        if (result.success) {
+          showToast('Recordatorio creado desde gasto recurrente');
+          cargarRecordatorios();
+          cargarGastosRecurrentes();
+        } else {
+          showToast(result.error || 'Error al crear recordatorio', 'error');
+        }
+      });
+    }
+    
+    // =====================================================
+    // INICIALIZACIÓN
+    // =====================================================
+    function init() {
+      // Setear fecha de hoy por defecto
+      document.getElementById('gastoFecha').value = new Date().toISOString().split('T')[0];
+      
+      // Cargar datos iniciales
+      showLoading();
+      cargarCategorias().then(function() {
+        return cargarGastos();
+      }).then(function() {
+        return cargarRecordatorios();
+      }).then(function() {
+        hideLoading();
+      });
+    }
+    
+    // Iniciar app
+    init();
+  </script>
+</body>
+</html>
