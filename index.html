@@ -2183,10 +2183,10 @@ Fecha: 2026-04-07 13:00 ARG
       
       // Construir mensaje
       var mensaje = '*GASTOS ' + nombreMes.toUpperCase() + '*\n';
-      mensaje += '------------------------\n';
+      mensaje += '------------------------\n\n';
       
       gastosMes.forEach(function(g) {
-        mensaje += '- ' + g.descripcion + ' | ' + formatDate(g.fecha) + ' | ' + formatMoney(g.monto) + '\n';
+        mensaje += '- ' + g.descripcion + ' | ' + formatMoney(g.monto) + '\n\n';
       });
       
       mensaje += '------------------------\n';
