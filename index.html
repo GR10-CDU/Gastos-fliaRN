@@ -1353,12 +1353,48 @@ Fecha: 2026-04-07 13:00 ARG
       });
     }
     
-    function formatDate(dateStr) {
-      var date = new Date(dateStr + 'T00:00:00');
-      return date.toLocaleDateString('es-AR', { 
-        day: '2-digit', 
-        month: 'short'
-      });
+    function formatDate(dateInput) {
+      if (!dateInput) return '';
+      
+      var date;
+      
+      // Si es string
+      if (typeof dateInput === 'string') {
+        // Formato ISO: 2026-04-07T00:00:00.000Z
+        if (dateInput.includes('T')) {
+          date = new Date(dateInput);
+        }
+        // Formato yyyy-mm-dd
+        else if (dateInput.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          var parts = dateInput.split('-');
+          date = new Date(parts[0], parts[1] - 1, parts[2]);
+        }
+        // Otros formatos
+        else {
+          date = new Date(dateInput);
+        }
+      }
+      // Si ya es Date
+      else if (dateInput instanceof Date) {
+        date = dateInput;
+      }
+      // Si es número (timestamp)
+      else if (typeof dateInput === 'number') {
+        date = new Date(dateInput);
+      }
+      else {
+        return '';
+      }
+      
+      // Verificar que sea fecha válida
+      if (isNaN(date.getTime())) return '';
+      
+      // Formatear como DD/MM/AAAA
+      var day = String(date.getDate()).padStart(2, '0');
+      var month = String(date.getMonth() + 1).padStart(2, '0');
+      var year = date.getFullYear();
+      
+      return day + '/' + month + '/' + year;
     }
     
     function apiCall(action, data) {
