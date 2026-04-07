@@ -1106,11 +1106,21 @@ Fecha: 2026-04-07 13:00 ARG
     
     <!-- PAGE: ESTADÍSTICAS -->
     <section class="page" id="page-estadisticas">
-      <div class="periodo-selector">
-        <button class="periodo-btn" data-periodo="semana">Semana</button>
-        <button class="periodo-btn active" data-periodo="mes">Mes</button>
-        <button class="periodo-btn" data-periodo="trimestre">Trimestre</button>
-        <button class="periodo-btn" data-periodo="año">Año</button>
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+        <div class="periodo-selector" style="margin-bottom: 0;">
+          <button class="periodo-btn" data-periodo="semana">Semana</button>
+          <button class="periodo-btn active" data-periodo="mes">Mes</button>
+          <button class="periodo-btn" data-periodo="trimestre">Trimestre</button>
+          <button class="periodo-btn" data-periodo="año">Año</button>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <select class="form-select" id="selectMesWhatsapp" style="width: auto;">
+            <option value="">Seleccionar mes...</option>
+          </select>
+          <button class="btn btn-primary" id="btnEnviarWhatsapp" style="background: #25D366;">
+            <span>💬</span> Enviar por WhatsApp
+          </button>
+        </div>
       </div>
       
       <div class="stats-grid" id="statsResumen">
@@ -1153,18 +1163,34 @@ Fecha: 2026-04-07 13:00 ARG
           </div>
         </div>
         <form id="formNuevoRecordatorio">
+          <!-- Toggle: usar gasto existente -->
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+              <input type="checkbox" id="chkUsarGastoExistente" style="width: 20px; height: 20px; accent-color: var(--accent-primary);">
+              <span class="form-label" style="margin: 0;">Crear desde un gasto ya registrado</span>
+            </label>
+          </div>
+          
+          <!-- Selector de gasto existente (oculto por defecto) -->
+          <div class="form-group full-width" id="containerGastoExistente" style="display: none; margin-bottom: 20px;">
+            <label class="form-label">Seleccionar Gasto</label>
+            <select class="form-select" id="selectGastoExistente">
+              <option value="">Elegir gasto...</option>
+            </select>
+          </div>
+          
           <div class="form-grid">
-            <div class="form-group">
+            <div class="form-group" id="grpTitulo">
               <label class="form-label">Título</label>
               <input type="text" class="form-input" id="recTitulo" placeholder="Ej: Luz, Internet, Alquiler" required>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="grpCategoria">
               <label class="form-label">Categoría</label>
               <select class="form-select" id="recCategoria" required>
                 <option value="">Seleccionar...</option>
               </select>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="grpMonto">
               <label class="form-label">Monto Estimado</label>
               <input type="number" class="form-input form-input-money" id="recMonto" placeholder="0.00" step="0.01" min="0" required>
             </div>
@@ -1177,7 +1203,7 @@ Fecha: 2026-04-07 13:00 ARG
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Próxima Fecha</label>
+              <label class="form-label">Fecha del Recordatorio</label>
               <input type="date" class="form-input" id="recProximaFecha" required>
             </div>
             <div class="form-group">
@@ -2063,6 +2089,171 @@ Fecha: 2026-04-07 13:00 ARG
     }
     
     // =====================================================
+    // WHATSAPP - ENVIAR RESUMEN MENSUAL
+    // =====================================================
+    function poblarSelectMeses() {
+      var select = document.getElementById('selectMesWhatsapp');
+      var meses = {};
+      
+      // Agrupar gastos por mes
+      gastos.forEach(function(g) {
+        if (g.fecha) {
+          var parts = g.fecha.split('-');
+          if (parts.length >= 2) {
+            var key = parts[0] + '-' + parts[1]; // yyyy-mm
+            meses[key] = true;
+          }
+        }
+      });
+      
+      // Convertir a array y ordenar descendente
+      var mesesArray = Object.keys(meses).sort().reverse();
+      
+      var nombresMeses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                          'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      
+      select.innerHTML = '<option value="">Seleccionar mes...</option>';
+      mesesArray.forEach(function(mes) {
+        var parts = mes.split('-');
+        var nombreMes = nombresMeses[parseInt(parts[1]) - 1] + ' ' + parts[0];
+        var option = document.createElement('option');
+        option.value = mes;
+        option.textContent = nombreMes;
+        select.appendChild(option);
+      });
+    }
+    
+    document.getElementById('btnEnviarWhatsapp').addEventListener('click', function() {
+      var mesSeleccionado = document.getElementById('selectMesWhatsapp').value;
+      
+      if (!mesSeleccionado) {
+        showToast('Seleccioná un mes primero', 'error');
+        return;
+      }
+      
+      // Filtrar gastos del mes
+      var gastosMes = gastos.filter(function(g) {
+        return g.fecha && g.fecha.startsWith(mesSeleccionado);
+      });
+      
+      if (gastosMes.length === 0) {
+        showToast('No hay gastos en ese mes', 'error');
+        return;
+      }
+      
+      // Ordenar por fecha
+      gastosMes.sort(function(a, b) {
+        return a.fecha.localeCompare(b.fecha);
+      });
+      
+      // Calcular total
+      var total = gastosMes.reduce(function(sum, g) {
+        return sum + Number(g.monto);
+      }, 0);
+      
+      // Nombre del mes
+      var nombresMeses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                          'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      var parts = mesSeleccionado.split('-');
+      var nombreMes = nombresMeses[parseInt(parts[1]) - 1] + ' ' + parts[0];
+      
+      // Construir mensaje
+      var mensaje = '💰 *GASTOS ' + nombreMes.toUpperCase() + '*\n';
+      mensaje += '━━━━━━━━━━━━━━━━━━\n\n';
+      
+      gastosMes.forEach(function(g) {
+        var cat = categorias.find(function(c) { return c.id === g.categoriaId; }) || { icono: '📦' };
+        mensaje += cat.icono + ' *' + g.descripcion + '*\n';
+        mensaje += '   📅 ' + formatDate(g.fecha) + ' | 💵 ' + formatMoney(g.monto) + '\n\n';
+      });
+      
+      mensaje += '━━━━━━━━━━━━━━━━━━\n';
+      mensaje += '📊 *TOTAL: ' + formatMoney(total) + '*\n';
+      mensaje += '📝 ' + gastosMes.length + ' gastos registrados';
+      
+      // Abrir WhatsApp
+      var url = 'https://wa.me/?text=' + encodeURIComponent(mensaje);
+      window.open(url, '_blank');
+    });
+    
+    // =====================================================
+    // RECORDATORIOS DESDE GASTOS EXISTENTES
+    // =====================================================
+    function poblarSelectGastosExistentes() {
+      var select = document.getElementById('selectGastoExistente');
+      
+      // Agrupar gastos únicos por descripción
+      var gastosUnicos = {};
+      gastos.forEach(function(g) {
+        var key = g.descripcion.toLowerCase().trim();
+        if (!gastosUnicos[key]) {
+          gastosUnicos[key] = {
+            descripcion: g.descripcion,
+            categoriaId: g.categoriaId,
+            monto: g.monto,
+            count: 1
+          };
+        } else {
+          gastosUnicos[key].count++;
+          gastosUnicos[key].monto = g.monto; // último monto
+        }
+      });
+      
+      // Convertir a array y ordenar por frecuencia
+      var gastosArray = Object.values(gastosUnicos);
+      gastosArray.sort(function(a, b) { return b.count - a.count; });
+      
+      select.innerHTML = '<option value="">Elegir gasto...</option>';
+      gastosArray.forEach(function(g, idx) {
+        var cat = categorias.find(function(c) { return c.id === g.categoriaId; }) || { icono: '📦' };
+        var option = document.createElement('option');
+        option.value = idx;
+        option.dataset.descripcion = g.descripcion;
+        option.dataset.categoriaId = g.categoriaId;
+        option.dataset.monto = g.monto;
+        option.textContent = cat.icono + ' ' + g.descripcion + ' - ' + formatMoney(g.monto) + ' (' + g.count + 'x)';
+        select.appendChild(option);
+      });
+    }
+    
+    // Toggle checkbox "usar gasto existente"
+    document.getElementById('chkUsarGastoExistente').addEventListener('change', function() {
+      var container = document.getElementById('containerGastoExistente');
+      var grpTitulo = document.getElementById('grpTitulo');
+      var grpCategoria = document.getElementById('grpCategoria');
+      var grpMonto = document.getElementById('grpMonto');
+      
+      if (this.checked) {
+        container.style.display = 'block';
+        poblarSelectGastosExistentes();
+        // Hacer campos opcionales cuando se usa gasto existente
+        document.getElementById('recTitulo').required = false;
+        document.getElementById('recCategoria').required = false;
+        document.getElementById('recMonto').required = false;
+      } else {
+        container.style.display = 'none';
+        document.getElementById('selectGastoExistente').value = '';
+        document.getElementById('recTitulo').required = true;
+        document.getElementById('recCategoria').required = true;
+        document.getElementById('recMonto').required = true;
+        // Limpiar campos
+        document.getElementById('recTitulo').value = '';
+        document.getElementById('recCategoria').value = '';
+        document.getElementById('recMonto').value = '';
+      }
+    });
+    
+    // Al seleccionar un gasto existente, llenar los campos
+    document.getElementById('selectGastoExistente').addEventListener('change', function() {
+      var option = this.options[this.selectedIndex];
+      if (option.value) {
+        document.getElementById('recTitulo').value = option.dataset.descripcion;
+        document.getElementById('recCategoria').value = option.dataset.categoriaId;
+        document.getElementById('recMonto').value = option.dataset.monto;
+      }
+    });
+    
+    // =====================================================
     // INICIALIZACIÓN OPTIMIZADA
     // =====================================================
     function init() {
@@ -2078,6 +2269,7 @@ Fecha: 2026-04-07 13:00 ARG
           gastos = result.gastos;
           renderGastos();
           actualizarHeaderStats();
+          poblarSelectMeses(); // Para WhatsApp
           
           recordatorios = result.recordatorios;
           renderRecordatorios();
