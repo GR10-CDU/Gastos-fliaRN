@@ -1155,30 +1155,54 @@ Fecha: 2026-04-07 13:00 ARG
     
     <!-- PAGE: RECORDATORIOS -->
     <section class="page" id="page-recordatorios">
+      
+      <!-- Card: Crear desde gastos existentes (múltiple) -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="card-title-icon">📋</span>
+            Crear Recordatorios desde Gastos
+          </div>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 16px;">
+          Seleccioná los gastos que querés convertir en recordatorios, elegí frecuencia y fecha, y crealos todos juntos.
+        </p>
+        
+        <div class="form-grid" style="margin-bottom: 16px;">
+          <div class="form-group">
+            <label class="form-label">Frecuencia para todos</label>
+            <select class="form-select" id="recMultiFrecuencia">
+              <option value="mensual">Mensual</option>
+              <option value="semanal">Semanal</option>
+              <option value="anual">Anual</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha del Recordatorio</label>
+            <input type="date" class="form-input" id="recMultiFecha">
+          </div>
+        </div>
+        
+        <div id="listaGastosCheckbox" style="max-height: 300px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: var(--radius-md); margin-bottom: 16px;"></div>
+        
+        <div class="btn-group">
+          <button type="button" class="btn btn-primary" id="btnCrearMultiplesRec">
+            <span>🔔</span> Crear Recordatorios Seleccionados
+          </button>
+          <button type="button" class="btn btn-secondary" id="btnSeleccionarTodos">Seleccionar Todos</button>
+          <button type="button" class="btn btn-secondary" id="btnDeseleccionarTodos">Deseleccionar</button>
+        </div>
+      </div>
+      
+      <!-- Card: Crear recordatorio manual -->
       <div class="card">
         <div class="card-header">
           <div class="card-title">
             <span class="card-title-icon">➕</span>
-            Nuevo Recordatorio
+            Crear Recordatorio Manual
           </div>
         </div>
         <form id="formNuevoRecordatorio">
-          <!-- Toggle: usar gasto existente -->
-          <div class="form-group" style="margin-bottom: 20px;">
-            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-              <input type="checkbox" id="chkUsarGastoExistente" style="width: 20px; height: 20px; accent-color: var(--accent-primary);">
-              <span class="form-label" style="margin: 0;">Crear desde un gasto ya registrado</span>
-            </label>
-          </div>
-          
-          <!-- Selector de gasto existente (oculto por defecto) -->
-          <div class="form-group full-width" id="containerGastoExistente" style="display: none; margin-bottom: 20px;">
-            <label class="form-label">Seleccionar Gasto</label>
-            <select class="form-select" id="selectGastoExistente">
-              <option value="">Elegir gasto...</option>
-            </select>
-          </div>
-          
           <div class="form-grid">
             <div class="form-group" id="grpTitulo">
               <label class="form-label">Título</label>
@@ -2158,18 +2182,15 @@ Fecha: 2026-04-07 13:00 ARG
       var nombreMes = nombresMeses[parseInt(parts[1]) - 1] + ' ' + parts[0];
       
       // Construir mensaje
-      var mensaje = '💰 *GASTOS ' + nombreMes.toUpperCase() + '*\n';
-      mensaje += '━━━━━━━━━━━━━━━━━━\n\n';
+      var mensaje = '*GASTOS ' + nombreMes.toUpperCase() + '*\n';
+      mensaje += '------------------------\n';
       
       gastosMes.forEach(function(g) {
-        var cat = categorias.find(function(c) { return c.id === g.categoriaId; }) || { icono: '📦' };
-        mensaje += cat.icono + ' *' + g.descripcion + '*\n';
-        mensaje += '   📅 ' + formatDate(g.fecha) + ' | 💵 ' + formatMoney(g.monto) + '\n\n';
+        mensaje += '- ' + g.descripcion + ' | ' + formatDate(g.fecha) + ' | ' + formatMoney(g.monto) + '\n';
       });
       
-      mensaje += '━━━━━━━━━━━━━━━━━━\n';
-      mensaje += '📊 *TOTAL: ' + formatMoney(total) + '*\n';
-      mensaje += '📝 ' + gastosMes.length + ' gastos registrados';
+      mensaje += '------------------------\n';
+      mensaje += '*TOTAL: ' + formatMoney(total) + '* (' + gastosMes.length + ' gastos)';
       
       // Abrir WhatsApp
       var url = 'https://wa.me/?text=' + encodeURIComponent(mensaje);
@@ -2177,10 +2198,12 @@ Fecha: 2026-04-07 13:00 ARG
     });
     
     // =====================================================
-    // RECORDATORIOS DESDE GASTOS EXISTENTES
+    // RECORDATORIOS DESDE GASTOS EXISTENTES (MÚLTIPLE)
     // =====================================================
-    function poblarSelectGastosExistentes() {
-      var select = document.getElementById('selectGastoExistente');
+    var gastosUnicosArray = [];
+    
+    function renderListaGastosCheckbox() {
+      var container = document.getElementById('listaGastosCheckbox');
       
       // Agrupar gastos únicos por descripción
       var gastosUnicos = {};
@@ -2195,62 +2218,88 @@ Fecha: 2026-04-07 13:00 ARG
           };
         } else {
           gastosUnicos[key].count++;
-          gastosUnicos[key].monto = g.monto; // último monto
+          gastosUnicos[key].monto = g.monto;
         }
       });
       
       // Convertir a array y ordenar por frecuencia
-      var gastosArray = Object.values(gastosUnicos);
-      gastosArray.sort(function(a, b) { return b.count - a.count; });
+      gastosUnicosArray = Object.values(gastosUnicos);
+      gastosUnicosArray.sort(function(a, b) { return b.count - a.count; });
       
-      select.innerHTML = '<option value="">Elegir gasto...</option>';
-      gastosArray.forEach(function(g, idx) {
-        var cat = categorias.find(function(c) { return c.id === g.categoriaId; }) || { icono: '📦' };
-        var option = document.createElement('option');
-        option.value = idx;
-        option.dataset.descripcion = g.descripcion;
-        option.dataset.categoriaId = g.categoriaId;
-        option.dataset.monto = g.monto;
-        option.textContent = cat.icono + ' ' + g.descripcion + ' - ' + formatMoney(g.monto) + ' (' + g.count + 'x)';
-        select.appendChild(option);
-      });
+      if (gastosUnicosArray.length === 0) {
+        container.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);">No hay gastos registrados</div>';
+        return;
+      }
+      
+      container.innerHTML = gastosUnicosArray.map(function(g, idx) {
+        var cat = categorias.find(function(c) { return c.id === g.categoriaId; }) || { icono: '📦', nombre: 'Sin categoría', color: '#94A3B8' };
+        return '<label style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background=\'var(--bg-tertiary)\'" onmouseout="this.style.background=\'transparent\'">' +
+          '<input type="checkbox" class="chk-gasto" data-idx="' + idx + '" style="width: 20px; height: 20px; accent-color: var(--accent-primary);">' +
+          '<div style="width: 36px; height: 36px; border-radius: 8px; background: ' + cat.color + '20; color: ' + cat.color + '; display: flex; align-items: center; justify-content: center; font-size: 16px;">' + cat.icono + '</div>' +
+          '<div style="flex: 1; min-width: 0;">' +
+            '<div style="font-weight: 500; font-size: 14px;">' + g.descripcion + '</div>' +
+            '<div style="font-size: 12px; color: var(--text-muted);">' + cat.nombre + ' • ' + g.count + ' veces</div>' +
+          '</div>' +
+          '<div style="font-weight: 600; color: var(--accent-primary);">' + formatMoney(g.monto) + '</div>' +
+        '</label>';
+      }).join('');
     }
     
-    // Toggle checkbox "usar gasto existente"
-    document.getElementById('chkUsarGastoExistente').addEventListener('change', function() {
-      var container = document.getElementById('containerGastoExistente');
-      var grpTitulo = document.getElementById('grpTitulo');
-      var grpCategoria = document.getElementById('grpCategoria');
-      var grpMonto = document.getElementById('grpMonto');
+    // Botón crear múltiples recordatorios
+    document.getElementById('btnCrearMultiplesRec').addEventListener('click', function() {
+      var checkboxes = document.querySelectorAll('.chk-gasto:checked');
+      var fecha = document.getElementById('recMultiFecha').value;
+      var frecuencia = document.getElementById('recMultiFrecuencia').value;
       
-      if (this.checked) {
-        container.style.display = 'block';
-        poblarSelectGastosExistentes();
-        // Hacer campos opcionales cuando se usa gasto existente
-        document.getElementById('recTitulo').required = false;
-        document.getElementById('recCategoria').required = false;
-        document.getElementById('recMonto').required = false;
-      } else {
-        container.style.display = 'none';
-        document.getElementById('selectGastoExistente').value = '';
-        document.getElementById('recTitulo').required = true;
-        document.getElementById('recCategoria').required = true;
-        document.getElementById('recMonto').required = true;
-        // Limpiar campos
-        document.getElementById('recTitulo').value = '';
-        document.getElementById('recCategoria').value = '';
-        document.getElementById('recMonto').value = '';
+      if (checkboxes.length === 0) {
+        showToast('Seleccioná al menos un gasto', 'error');
+        return;
       }
+      
+      if (!fecha) {
+        showToast('Seleccioná la fecha del recordatorio', 'error');
+        return;
+      }
+      
+      showLoading();
+      
+      var promesas = [];
+      checkboxes.forEach(function(chk) {
+        var idx = parseInt(chk.dataset.idx);
+        var gasto = gastosUnicosArray[idx];
+        
+        var recordatorio = {
+          titulo: gasto.descripcion,
+          descripcion: 'Creado desde gasto existente',
+          monto: gasto.monto,
+          categoriaId: gasto.categoriaId,
+          frecuencia: frecuencia,
+          proximaFecha: fecha
+        };
+        
+        promesas.push(apiCall('addRecordatorio', { recordatorio: recordatorio }));
+      });
+      
+      Promise.all(promesas).then(function(resultados) {
+        hideLoading();
+        var exitosos = resultados.filter(function(r) { return r.success; }).length;
+        showToast(exitosos + ' recordatorio(s) creado(s)');
+        
+        // Limpiar selección
+        document.querySelectorAll('.chk-gasto').forEach(function(chk) { chk.checked = false; });
+        
+        cargarRecordatorios();
+      });
     });
     
-    // Al seleccionar un gasto existente, llenar los campos
-    document.getElementById('selectGastoExistente').addEventListener('change', function() {
-      var option = this.options[this.selectedIndex];
-      if (option.value) {
-        document.getElementById('recTitulo').value = option.dataset.descripcion;
-        document.getElementById('recCategoria').value = option.dataset.categoriaId;
-        document.getElementById('recMonto').value = option.dataset.monto;
-      }
+    // Botón seleccionar todos
+    document.getElementById('btnSeleccionarTodos').addEventListener('click', function() {
+      document.querySelectorAll('.chk-gasto').forEach(function(chk) { chk.checked = true; });
+    });
+    
+    // Botón deseleccionar todos
+    document.getElementById('btnDeseleccionarTodos').addEventListener('click', function() {
+      document.querySelectorAll('.chk-gasto').forEach(function(chk) { chk.checked = false; });
     });
     
     // =====================================================
@@ -2270,6 +2319,7 @@ Fecha: 2026-04-07 13:00 ARG
           renderGastos();
           actualizarHeaderStats();
           poblarSelectMeses(); // Para WhatsApp
+          renderListaGastosCheckbox(); // Para recordatorios múltiples
           
           recordatorios = result.recordatorios;
           renderRecordatorios();
