@@ -1106,23 +1106,70 @@ Fecha: 2026-04-07 13:00 ARG
     
     <!-- PAGE: ESTADÍSTICAS -->
     <section class="page" id="page-estadisticas">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
-        <div class="periodo-selector" style="margin-bottom: 0;">
-          <button class="periodo-btn" data-periodo="semana">Semana</button>
-          <button class="periodo-btn active" data-periodo="mes">Mes</button>
-          <button class="periodo-btn" data-periodo="trimestre">Trimestre</button>
-          <button class="periodo-btn" data-periodo="año">Año</button>
+      <!-- Selectores de mes para comparar -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="card-title-icon">📅</span>
+            Seleccionar Período
+          </div>
         </div>
-        <div style="display: flex; gap: 12px; align-items: center;">
-          <select class="form-select" id="selectMesWhatsapp" style="width: auto;">
-            <option value="">Seleccionar mes...</option>
-          </select>
-          <button class="btn btn-primary" id="btnEnviarWhatsapp" style="background: #25D366;">
-            <span>💬</span> Enviar por WhatsApp
-          </button>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Mes Principal</label>
+            <select class="form-select" id="selectMesPrincipal">
+              <option value="">Seleccionar mes...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Comparar con (opcional)</label>
+            <select class="form-select" id="selectMesComparar">
+              <option value="">Sin comparación</option>
+            </select>
+          </div>
+          <div class="form-group" style="display: flex; align-items: flex-end;">
+            <button class="btn btn-primary" id="btnVerEstadisticas">
+              <span>📊</span> Ver Estadísticas
+            </button>
+          </div>
+          <div class="form-group" style="display: flex; align-items: flex-end;">
+            <button class="btn btn-primary" id="btnEnviarWhatsapp" style="background: #25D366;">
+              <span>💬</span> WhatsApp
+            </button>
+          </div>
         </div>
       </div>
       
+      <!-- Comparación de meses -->
+      <div id="comparacionMeses" style="display: none; margin-bottom: 24px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div class="card" style="margin-bottom: 0;">
+            <div class="card-header">
+              <div class="card-title" id="tituloMes1">Mes 1</div>
+            </div>
+            <div style="text-align: center; padding: 10px 0;">
+              <div style="font-size: 32px; font-weight: 700; color: var(--accent-red);" id="totalMes1">$0</div>
+              <div style="font-size: 13px; color: var(--text-muted);" id="cantidadMes1">0 gastos</div>
+            </div>
+          </div>
+          <div class="card" style="margin-bottom: 0;">
+            <div class="card-header">
+              <div class="card-title" id="tituloMes2">Mes 2</div>
+            </div>
+            <div style="text-align: center; padding: 10px 0;">
+              <div style="font-size: 32px; font-weight: 700; color: var(--accent-red);" id="totalMes2">$0</div>
+              <div style="font-size: 13px; color: var(--text-muted);" id="cantidadMes2">0 gastos</div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top: 20px; text-align: center;">
+          <div style="font-size: 14px; color: var(--text-secondary);">Diferencia</div>
+          <div style="font-size: 28px; font-weight: 700;" id="diferenciaMeses">$0</div>
+          <div style="font-size: 13px;" id="porcentajeDiferencia"></div>
+        </div>
+      </div>
+      
+      <!-- Stats del mes seleccionado -->
       <div class="stats-grid" id="statsResumen">
         <div class="stat-card">
           <div class="stat-value negative" id="statTotal">$0</div>
@@ -1147,9 +1194,15 @@ Fecha: 2026-04-07 13:00 ARG
         <div class="category-bars" id="categoryBars"></div>
       </div>
       
-      <div class="chart-container">
-        <div class="chart-title">📈 Evolución Diaria</div>
-        <canvas id="chartEvolucion" height="200"></canvas>
+      <!-- Lista de gastos del mes -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="card-title-icon">📋</span>
+            Detalle de Gastos del Mes
+          </div>
+        </div>
+        <div class="gastos-list" id="gastosDelMes" style="max-height: 400px; overflow-y: auto;"></div>
       </div>
     </section>
     
@@ -1872,42 +1925,223 @@ Fecha: 2026-04-07 13:00 ARG
     });
     
     // =====================================================
-    // ESTADÍSTICAS
+    // ESTADÍSTICAS CON COMPARACIÓN DE MESES
     // =====================================================
-    document.querySelectorAll('.periodo-btn').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        document.querySelectorAll('.periodo-btn').forEach(function(b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-        periodoActual = btn.dataset.periodo;
-        cargarEstadisticas();
-      });
-    });
+    var nombresMeses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     
-    function cargarEstadisticas() {
-      showLoading();
-      apiCall('getEstadisticas', { periodo: periodoActual }).then(function(result) {
-        hideLoading();
-        if (result.success) {
-          document.getElementById('statTotal').textContent = formatMoney(result.resumen.totalGeneral);
-          document.getElementById('statCantidad').textContent = result.resumen.cantidadGastos;
-          document.getElementById('statPromedio').textContent = formatMoney(result.resumen.promedioGasto);
-          
-          var dias;
-          switch(periodoActual) {
-            case 'semana': dias = 7; break;
-            case 'mes': dias = 30; break;
-            case 'trimestre': dias = 90; break;
-            case 'año': dias = 365; break;
-            default: dias = 30;
+    function poblarSelectsMeses() {
+      var selectPrincipal = document.getElementById('selectMesPrincipal');
+      var selectComparar = document.getElementById('selectMesComparar');
+      var meses = {};
+      
+      // Agrupar gastos por mes
+      gastos.forEach(function(g) {
+        if (g.fecha) {
+          var parts = g.fecha.split('-');
+          if (parts.length >= 2) {
+            var key = parts[0] + '-' + parts[1];
+            meses[key] = true;
           }
-          var promedioDiario = result.resumen.totalGeneral / dias;
-          document.getElementById('statDiario').textContent = formatMoney(promedioDiario);
-          
-          renderCategoryBars(result.estadisticas, result.resumen.totalGeneral);
-          renderEvolucionChart(result.evolucion);
         }
       });
+      
+      var mesesArray = Object.keys(meses).sort().reverse();
+      
+      selectPrincipal.innerHTML = '<option value="">Seleccionar mes...</option>';
+      selectComparar.innerHTML = '<option value="">Sin comparación</option>';
+      
+      mesesArray.forEach(function(mes) {
+        var parts = mes.split('-');
+        var nombreMes = nombresMeses[parseInt(parts[1]) - 1] + ' ' + parts[0];
+        
+        var option1 = document.createElement('option');
+        option1.value = mes;
+        option1.textContent = nombreMes;
+        selectPrincipal.appendChild(option1);
+        
+        var option2 = document.createElement('option');
+        option2.value = mes;
+        option2.textContent = nombreMes;
+        selectComparar.appendChild(option2);
+      });
+      
+      // Seleccionar mes actual por defecto
+      if (mesesArray.length > 0) {
+        selectPrincipal.value = mesesArray[0];
+      }
     }
+    
+    function obtenerGastosMes(mesKey) {
+      return gastos.filter(function(g) {
+        return g.fecha && g.fecha.startsWith(mesKey);
+      });
+    }
+    
+    function calcularEstadisticasMes(gastosMes) {
+      var total = 0;
+      var porCategoria = {};
+      
+      gastosMes.forEach(function(g) {
+        var monto = Number(g.monto) || 0;
+        total += monto;
+        
+        if (!porCategoria[g.categoriaId]) {
+          var cat = categorias.find(function(c) { return c.id === g.categoriaId; }) || { nombre: 'Sin categoría', icono: '📦', color: '#94A3B8' };
+          porCategoria[g.categoriaId] = {
+            categoriaId: g.categoriaId,
+            nombre: cat.nombre,
+            icono: cat.icono,
+            color: cat.color,
+            total: 0,
+            cantidad: 0
+          };
+        }
+        porCategoria[g.categoriaId].total += monto;
+        porCategoria[g.categoriaId].cantidad++;
+      });
+      
+      var estadisticas = Object.values(porCategoria);
+      estadisticas.forEach(function(e) {
+        e.porcentaje = total > 0 ? (e.total / total * 100).toFixed(1) : 0;
+      });
+      estadisticas.sort(function(a, b) { return b.total - a.total; });
+      
+      return {
+        total: total,
+        cantidad: gastosMes.length,
+        promedio: gastosMes.length > 0 ? total / gastosMes.length : 0,
+        estadisticas: estadisticas
+      };
+    }
+    
+    function mostrarEstadisticasMes() {
+      var mesPrincipal = document.getElementById('selectMesPrincipal').value;
+      var mesComparar = document.getElementById('selectMesComparar').value;
+      
+      if (!mesPrincipal) {
+        showToast('Seleccioná un mes', 'error');
+        return;
+      }
+      
+      var gastosMes1 = obtenerGastosMes(mesPrincipal);
+      var stats1 = calcularEstadisticasMes(gastosMes1);
+      
+      // Mostrar stats principales
+      document.getElementById('statTotal').textContent = formatMoney(stats1.total);
+      document.getElementById('statCantidad').textContent = stats1.cantidad;
+      document.getElementById('statPromedio').textContent = formatMoney(stats1.promedio);
+      
+      var diasEnMes = new Date(parseInt(mesPrincipal.split('-')[0]), parseInt(mesPrincipal.split('-')[1]), 0).getDate();
+      document.getElementById('statDiario').textContent = formatMoney(stats1.total / diasEnMes);
+      
+      // Mostrar barras de categorías
+      renderCategoryBars(stats1.estadisticas, stats1.total);
+      
+      // Mostrar lista de gastos del mes
+      renderGastosDelMes(gastosMes1);
+      
+      // Comparación
+      var comparacionDiv = document.getElementById('comparacionMeses');
+      if (mesComparar && mesComparar !== mesPrincipal) {
+        var gastosMes2 = obtenerGastosMes(mesComparar);
+        var stats2 = calcularEstadisticasMes(gastosMes2);
+        
+        var partsMes1 = mesPrincipal.split('-');
+        var partsMes2 = mesComparar.split('-');
+        
+        document.getElementById('tituloMes1').textContent = nombresMeses[parseInt(partsMes1[1]) - 1] + ' ' + partsMes1[0];
+        document.getElementById('tituloMes2').textContent = nombresMeses[parseInt(partsMes2[1]) - 1] + ' ' + partsMes2[0];
+        document.getElementById('totalMes1').textContent = formatMoney(stats1.total);
+        document.getElementById('totalMes2').textContent = formatMoney(stats2.total);
+        document.getElementById('cantidadMes1').textContent = stats1.cantidad + ' gastos';
+        document.getElementById('cantidadMes2').textContent = stats2.cantidad + ' gastos';
+        
+        var diferencia = stats1.total - stats2.total;
+        var porcentaje = stats2.total > 0 ? ((diferencia / stats2.total) * 100).toFixed(1) : 0;
+        
+        document.getElementById('diferenciaMeses').textContent = (diferencia >= 0 ? '+' : '') + formatMoney(diferencia);
+        document.getElementById('diferenciaMeses').style.color = diferencia > 0 ? 'var(--accent-red)' : 'var(--accent-green)';
+        
+        var textoPorc = diferencia > 0 ? 'Gastaste ' + porcentaje + '% más' : 'Ahorraste ' + Math.abs(porcentaje) + '%';
+        document.getElementById('porcentajeDiferencia').textContent = textoPorc;
+        document.getElementById('porcentajeDiferencia').style.color = diferencia > 0 ? 'var(--accent-red)' : 'var(--accent-green)';
+        
+        comparacionDiv.style.display = 'block';
+      } else {
+        comparacionDiv.style.display = 'none';
+      }
+    }
+    
+    function renderGastosDelMes(gastosMes) {
+      var container = document.getElementById('gastosDelMes');
+      
+      if (!gastosMes.length) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-text">No hay gastos en este mes</div></div>';
+        return;
+      }
+      
+      // Ordenar por fecha
+      gastosMes.sort(function(a, b) { return b.fecha.localeCompare(a.fecha); });
+      
+      container.innerHTML = gastosMes.map(function(gasto) {
+        var cat = categorias.find(function(c) { return c.id === gasto.categoriaId; }) || { icono: '📦', color: '#94A3B8', nombre: 'Sin categoría' };
+        
+        return '<div class="gasto-item" style="padding: 12px 16px;">' +
+          '<div class="gasto-cat-icon" style="width: 36px; height: 36px; font-size: 16px; background: ' + cat.color + '20; color: ' + cat.color + ';">' + cat.icono + '</div>' +
+          '<div class="gasto-info">' +
+            '<div class="gasto-desc" style="font-size: 14px;">' + gasto.descripcion + '</div>' +
+            '<div class="gasto-meta" style="font-size: 12px;">' +
+              '<span>' + formatDate(gasto.fecha) + '</span>' +
+              '<span>' + cat.nombre + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="gasto-monto" style="font-size: 16px;">-' + formatMoney(gasto.monto) + '</div>' +
+          '<div class="gasto-actions" style="opacity: 1;">' +
+            '<button class="btn-icon" onclick="repetirGasto(\'' + gasto.id + '\')" title="Repetir pago" style="color: var(--accent-green); width: 32px; height: 32px;">🔄</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+    
+    // Event listeners
+    document.getElementById('btnVerEstadisticas').addEventListener('click', mostrarEstadisticasMes);
+    
+    document.getElementById('btnEnviarWhatsapp').addEventListener('click', function() {
+      var mesPrincipal = document.getElementById('selectMesPrincipal').value;
+      
+      if (!mesPrincipal) {
+        showToast('Seleccioná un mes primero', 'error');
+        return;
+      }
+      
+      var gastosMes = obtenerGastosMes(mesPrincipal);
+      
+      if (gastosMes.length === 0) {
+        showToast('No hay gastos en ese mes', 'error');
+        return;
+      }
+      
+      gastosMes.sort(function(a, b) { return a.fecha.localeCompare(b.fecha); });
+      
+      var total = gastosMes.reduce(function(sum, g) { return sum + Number(g.monto); }, 0);
+      
+      var parts = mesPrincipal.split('-');
+      var nombreMes = nombresMeses[parseInt(parts[1]) - 1] + ' ' + parts[0];
+      
+      var mensaje = '*GASTOS ' + nombreMes.toUpperCase() + '*\n';
+      mensaje += '------------------------\n\n';
+      
+      gastosMes.forEach(function(g) {
+        mensaje += '- ' + g.descripcion + ' | ' + formatMoney(g.monto) + '\n\n';
+      });
+      
+      mensaje += '------------------------\n';
+      mensaje += '*TOTAL: ' + formatMoney(total) + '* (' + gastosMes.length + ' gastos)';
+      
+      var url = 'https://wa.me/?text=' + encodeURIComponent(mensaje);
+      window.open(url, '_blank');
+    });
     
     function renderCategoryBars(estadisticas, total) {
       var container = document.getElementById('categoryBars');
@@ -1934,71 +2168,6 @@ Fecha: 2026-04-07 13:00 ARG
           '</div>' +
         '</div>';
       }).join('');
-    }
-    
-    function renderEvolucionChart(evolucion) {
-      var canvas = document.getElementById('chartEvolucion');
-      var ctx = canvas.getContext('2d');
-      
-      if (!evolucion || evolucion.length === 0) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#94A3B8';
-        ctx.font = '14px Inter';
-        ctx.textAlign = 'center';
-        ctx.fillText('Sin datos para este período', canvas.width / 2, canvas.height / 2);
-        return;
-      }
-      
-      var padding = 40;
-      var width = canvas.width;
-      var height = canvas.height;
-      var chartWidth = width - padding * 2;
-      var chartHeight = height - padding * 2;
-      
-      var maxValue = Math.max.apply(null, evolucion.map(function(e) { return e.monto; }));
-      var minValue = 0;
-      
-      ctx.clearRect(0, 0, width, height);
-      
-      // Área
-      ctx.beginPath();
-      evolucion.forEach(function(punto, i) {
-        var x = padding + (i / (evolucion.length - 1)) * chartWidth;
-        var y = height - padding - ((punto.monto - minValue) / (maxValue - minValue)) * chartHeight;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      });
-      ctx.lineTo(padding + chartWidth, height - padding);
-      ctx.lineTo(padding, height - padding);
-      ctx.closePath();
-      ctx.fillStyle = 'rgba(99, 102, 241, 0.1)';
-      ctx.fill();
-      
-      // Línea
-      ctx.beginPath();
-      ctx.strokeStyle = '#6366F1';
-      ctx.lineWidth = 3;
-      evolucion.forEach(function(punto, i) {
-        var x = padding + (i / (evolucion.length - 1)) * chartWidth;
-        var y = height - padding - ((punto.monto - minValue) / (maxValue - minValue)) * chartHeight;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      });
-      ctx.stroke();
-      
-      // Puntos
-      evolucion.forEach(function(punto, i) {
-        var x = padding + (i / (evolucion.length - 1)) * chartWidth;
-        var y = height - padding - ((punto.monto - minValue) / (maxValue - minValue)) * chartHeight;
-        ctx.beginPath();
-        ctx.arc(x, y, 5, 0, Math.PI * 2);
-        ctx.fillStyle = '#6366F1';
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(x, y, 3, 0, Math.PI * 2);
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fill();
-      });
     }
     
     // =====================================================
@@ -2196,91 +2365,6 @@ Fecha: 2026-04-07 13:00 ARG
     }
     
     // =====================================================
-    // WHATSAPP - ENVIAR RESUMEN MENSUAL
-    // =====================================================
-    function poblarSelectMeses() {
-      var select = document.getElementById('selectMesWhatsapp');
-      var meses = {};
-      
-      // Agrupar gastos por mes
-      gastos.forEach(function(g) {
-        if (g.fecha) {
-          var parts = g.fecha.split('-');
-          if (parts.length >= 2) {
-            var key = parts[0] + '-' + parts[1]; // yyyy-mm
-            meses[key] = true;
-          }
-        }
-      });
-      
-      // Convertir a array y ordenar descendente
-      var mesesArray = Object.keys(meses).sort().reverse();
-      
-      var nombresMeses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-                          'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-      
-      select.innerHTML = '<option value="">Seleccionar mes...</option>';
-      mesesArray.forEach(function(mes) {
-        var parts = mes.split('-');
-        var nombreMes = nombresMeses[parseInt(parts[1]) - 1] + ' ' + parts[0];
-        var option = document.createElement('option');
-        option.value = mes;
-        option.textContent = nombreMes;
-        select.appendChild(option);
-      });
-    }
-    
-    document.getElementById('btnEnviarWhatsapp').addEventListener('click', function() {
-      var mesSeleccionado = document.getElementById('selectMesWhatsapp').value;
-      
-      if (!mesSeleccionado) {
-        showToast('Seleccioná un mes primero', 'error');
-        return;
-      }
-      
-      // Filtrar gastos del mes
-      var gastosMes = gastos.filter(function(g) {
-        return g.fecha && g.fecha.startsWith(mesSeleccionado);
-      });
-      
-      if (gastosMes.length === 0) {
-        showToast('No hay gastos en ese mes', 'error');
-        return;
-      }
-      
-      // Ordenar por fecha
-      gastosMes.sort(function(a, b) {
-        return a.fecha.localeCompare(b.fecha);
-      });
-      
-      // Calcular total
-      var total = gastosMes.reduce(function(sum, g) {
-        return sum + Number(g.monto);
-      }, 0);
-      
-      // Nombre del mes
-      var nombresMeses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-                          'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-      var parts = mesSeleccionado.split('-');
-      var nombreMes = nombresMeses[parseInt(parts[1]) - 1] + ' ' + parts[0];
-      
-      // Construir mensaje
-      var mensaje = '*GASTOS ' + nombreMes.toUpperCase() + '*\n';
-      mensaje += '------------------------\n\n';
-      
-      gastosMes.forEach(function(g) {
-        mensaje += '- ' + g.descripcion + ' | ' + formatMoney(g.monto) + '\n\n';
-      });
-      
-      mensaje += '------------------------\n';
-      mensaje += '*TOTAL: ' + formatMoney(total) + '* (' + gastosMes.length + ' gastos)';
-      
-      // Abrir WhatsApp
-      var url = 'https://wa.me/?text=' + encodeURIComponent(mensaje);
-      window.open(url, '_blank');
-    });
-    
-    // =====================================================
     // RECORDATORIOS DESDE GASTOS EXISTENTES (MÚLTIPLE)
     // =====================================================
     var gastosUnicosArray = [];
@@ -2401,7 +2485,7 @@ Fecha: 2026-04-07 13:00 ARG
           gastos = result.gastos;
           renderGastos();
           actualizarHeaderStats();
-          poblarSelectMeses(); // Para WhatsApp
+          poblarSelectsMeses(); // Para estadísticas y WhatsApp
           renderListaGastosCheckbox(); // Para recordatorios múltiples
           
           recordatorios = result.recordatorios;
