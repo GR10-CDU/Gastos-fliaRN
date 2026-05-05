@@ -1350,6 +1350,39 @@ Fecha: 2026-04-07 13:00 ARG
     </div>
   </div>
   
+  <!-- MODAL REPETIR GASTO -->
+  <div class="modal-overlay" id="modalRepetirGasto">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">🔄 Repetir Pago</div>
+        <button class="modal-close" onclick="cerrarModal('modalRepetirGasto')">×</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: var(--bg-tertiary); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px;">
+          <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 4px;">Gasto a repetir:</div>
+          <div style="font-weight: 600; font-size: 16px;" id="repetirGastoNombre"></div>
+          <div style="font-size: 13px; color: var(--text-secondary);" id="repetirGastoCategoria"></div>
+        </div>
+        <input type="hidden" id="repetirGastoDescripcion">
+        <input type="hidden" id="repetirGastoCategoriaId">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Nuevo Monto</label>
+            <input type="number" class="form-input form-input-money" id="repetirGastoMonto" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha</label>
+            <input type="date" class="form-input" id="repetirGastoFecha" required>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="cerrarModal('modalRepetirGasto')">Cancelar</button>
+        <button class="btn btn-primary" onclick="confirmarRepetirGasto()" style="background: var(--accent-green);">🔄 Registrar Pago</button>
+      </div>
+    </div>
+  </div>
+  
   <!-- LOADING -->
   <div class="loading-overlay" id="loading">
     <div class="loading-spinner"></div>
@@ -1616,6 +1649,7 @@ Fecha: 2026-04-07 13:00 ARG
           '</div>' +
           '<div class="gasto-monto">-' + formatMoney(gasto.monto) + '</div>' +
           '<div class="gasto-actions">' +
+            '<button class="btn-icon" onclick="repetirGasto(\'' + gasto.id + '\')" title="Repetir pago" style="color: var(--accent-green);">🔄</button>' +
             '<button class="btn-icon" onclick="editarGasto(\'' + gasto.id + '\')" title="Editar">✏️</button>' +
             '<button class="btn-icon" onclick="eliminarGasto(\'' + gasto.id + '\')" title="Eliminar">🗑️</button>' +
           '</div>' +
@@ -1712,6 +1746,55 @@ Fecha: 2026-04-07 13:00 ARG
           cargarGastos();
         } else {
           showToast(result.error || 'Error al eliminar', 'error');
+        }
+      });
+    }
+    
+    function repetirGasto(id) {
+      var gasto = gastos.find(function(g) { return g.id === id; });
+      if (!gasto) return;
+      
+      var cat = categorias.find(function(c) { return c.id === gasto.categoriaId; }) || { icono: '📦', nombre: 'Sin categoría' };
+      
+      document.getElementById('repetirGastoNombre').textContent = cat.icono + ' ' + gasto.descripcion;
+      document.getElementById('repetirGastoCategoria').textContent = cat.nombre;
+      document.getElementById('repetirGastoDescripcion').value = gasto.descripcion;
+      document.getElementById('repetirGastoCategoriaId').value = gasto.categoriaId;
+      document.getElementById('repetirGastoMonto').value = gasto.monto;
+      document.getElementById('repetirGastoFecha').value = new Date().toISOString().split('T')[0];
+      
+      abrirModal('modalRepetirGasto');
+    }
+    
+    function confirmarRepetirGasto() {
+      var monto = parseFloat(document.getElementById('repetirGastoMonto').value);
+      var fecha = document.getElementById('repetirGastoFecha').value;
+      var descripcion = document.getElementById('repetirGastoDescripcion').value;
+      var categoriaId = document.getElementById('repetirGastoCategoriaId').value;
+      
+      if (!monto || !fecha) {
+        showToast('Completá monto y fecha', 'error');
+        return;
+      }
+      
+      showLoading();
+      
+      var gasto = {
+        fecha: fecha,
+        categoriaId: categoriaId,
+        monto: monto,
+        descripcion: descripcion,
+        observaciones: 'Pago repetido'
+      };
+      
+      apiCall('addGasto', { gasto: gasto }).then(function(result) {
+        hideLoading();
+        if (result.success) {
+          showToast('Pago registrado');
+          cerrarModal('modalRepetirGasto');
+          cargarGastos();
+        } else {
+          showToast(result.error || 'Error al registrar', 'error');
         }
       });
     }
